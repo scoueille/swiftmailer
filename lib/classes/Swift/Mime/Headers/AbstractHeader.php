@@ -287,13 +287,13 @@ abstract class Swift_Mime_Headers_AbstractHeader implements Swift_Mime_Header
             // See RFC 2822, Sect 2.2 (really 2.2 ??)
             if ($this->tokenNeedsEncoding($token)) {
                 // Don't encode starting WSP
-                $firstChar = substr($token, 0, 1);
+            /*    $firstChar = substr($token, 0, 1);
                 switch ($firstChar) {
                     case ' ':
                     case "\t":
                         $value .= $firstChar;
                         $token = substr($token, 1);
-                }
+                }*/
 
                 if (-1 == $usedLength) {
                     $usedLength = strlen($header->getFieldName().': ') + strlen($value);
@@ -347,6 +347,17 @@ abstract class Swift_Mime_Headers_AbstractHeader implements Swift_Mime_Header
         }
         if (strlen($encodedToken)) {
             $tokens[] = $encodedToken;
+        }
+        for ($index = 0; $index < count($tokens)-1; $index++) {
+            if($this->tokenNeedsEncoding($tokens[$index]) && !$this->tokenNeedsEncoding($tokens[$index+1])) {
+                $firstChar = substr($tokens[$index+1], 0, 1);
+                switch ($firstChar) {
+                    case ' ':
+                    case "\t":
+                        $tokens[$index] .= $firstChar;
+                        $tokens[$index+1] = substr($tokens[$index+1], 1);
+                }
+            }
         }
 
         return $tokens;
