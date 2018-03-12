@@ -281,31 +281,17 @@ abstract class Swift_Mime_Headers_AbstractHeader implements Swift_Mime_Header
     {
         $value = '';
 
-        $tokens = $this->getEncodableWordTokens($input);
+        if ($this->tokenNeedsEncoding($input)) {
 
-        foreach ($tokens as $token) {
-            // See RFC 2822, Sect 2.2 (really 2.2 ??)
-            if ($this->tokenNeedsEncoding($token)) {
-                // Don't encode starting WSP
-            /*    $firstChar = substr($token, 0, 1);
-                switch ($firstChar) {
-                    case ' ':
-                    case "\t":
-                        $value .= $firstChar;
-                        $token = substr($token, 1);
-                }*/
-
-                if (-1 == $usedLength) {
-                    $usedLength = strlen($header->getFieldName().': ') + strlen($value);
-                }
-                $value .= $this->getTokenAsEncodedWord($token, $usedLength);
-
-                $header->setMaxLineLength(76); // Forcefully override
-            } else {
-                $value .= $token;
+            if (-1 == $usedLength) {
+                $usedLength = strlen($header->getFieldName().': ') + strlen($value);
             }
-        }
+            $value .= $this->getTokenAsEncodedWord($input, $usedLength);
 
+            $header->setMaxLineLength(76); // Forcefully override
+        } else {
+            $value .= $input;
+        }
         return $value;
     }
 
